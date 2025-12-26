@@ -1,24 +1,22 @@
 package com.plugins.mybaitslog;
 
-import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManagerCore;
-import com.intellij.notification.*;
-import com.intellij.openapi.actionSystem.AnAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.application.ApplicationInfo;
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationGroupManager;
+import com.intellij.notification.NotificationListener;
+import com.intellij.notification.NotificationType;
 import com.intellij.openapi.extensions.PluginId;
-import com.intellij.openapi.ui.MessageType;
 import com.plugins.mybaitslog.gui.FilterSetting;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.event.HyperlinkEvent;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.lang.reflect.Method;
-import java.net.URL;
+import java.text.MessageFormat;
+import java.util.ResourceBundle;
 
 public class PluginUtil {
+
+    private static final ResourceBundle bundle = ResourceBundle.getBundle("messages.MyBatisLogBundle");
 
     /**
      * 获取核心Jar路径
@@ -59,31 +57,31 @@ public class PluginUtil {
                 // e.getDescription() 的值就是标签 a 中的 href 属性值
                 //启动filter配置
                 FilterSetting dialog = new FilterSetting();
-                dialog.pack();
-                dialog.setSize(520, 420);//配置大小
-                dialog.setResizable(true);
-                dialog.setLocationRelativeTo(null);//位置居中显示
-                dialog.setVisible(true);
+                dialog.show();
             }
         };
-        String content = "There is a new unknown actuator, Please exclude the options for configuration.<a href=\"configuration\">Open the configuration window</a>";
-        NotificationGroup notificationGroup = new NotificationGroup("Notification", NotificationDisplayType.BALLOON, false);
-        Notification notification = notificationGroup.createNotification("MyBatis Log EasyPlus", "", content, NotificationType.WARNING, notificationListener);
-        Notifications.Bus.notify(notification);
+        String content = bundle.getString("notification.content.unknown.actuator");
+        NotificationGroupManager.getInstance()
+                .getNotificationGroup("MyBatisLog.Notification")
+                .createNotification(bundle.getString("notification.title"), content, NotificationType.WARNING)
+                .setListener(notificationListener)
+                .notify(null);
     }
 
     public static void Notificat_Success() {
-        String content = "MyBatis Log EasyPlus Run";
-        NotificationGroup notificationGroup = new NotificationGroup("Notification", NotificationDisplayType.BALLOON, false);
-        Notification notification = notificationGroup.createNotification("MyBatis Log EasyPlus", "", content, NotificationType.INFORMATION);
-        Notifications.Bus.notify(notification);
+        String content = bundle.getString("notification.content.success");
+        NotificationGroupManager.getInstance()
+                .getNotificationGroup("MyBatisLog.Notification")
+                .createNotification(bundle.getString("notification.title"), content, NotificationType.INFORMATION)
+                .notify(null);
     }
 
     public static void Notificat_Error(String error) {
-        String content = error + ", MyBatis Log EasyPlus Unable to Run";
-        NotificationGroup notificationGroup = new NotificationGroup("Notification", NotificationDisplayType.BALLOON, false);
-        Notification notification = notificationGroup.createNotification("MyBatis Log EasyPlus", "", content, NotificationType.ERROR);
-        Notifications.Bus.notify(notification);
+        String content = MessageFormat.format(bundle.getString("notification.content.error"), error);
+        NotificationGroupManager.getInstance()
+                .getNotificationGroup("MyBatisLog.Notification")
+                .createNotification(bundle.getString("notification.title"), content, NotificationType.ERROR)
+                .notify(null);
     }
 
 }

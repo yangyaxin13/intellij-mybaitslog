@@ -86,11 +86,7 @@ public class ConsolePanel {
         ConsoleActionGroup.withFilter(() -> {
             //启动filter配置
             FilterSetting dialog = new FilterSetting();
-            dialog.pack();
-            dialog.setSize(520, 420);//配置大小
-            dialog.setResizable(true);
-            dialog.setLocationRelativeTo(null);//位置居中显示
-            dialog.setVisible(true);
+            dialog.show();
         });
         actionGroup.add(new ConsoleActionGroup.FilterAction());
         actionGroup.addAll(consoleView.createConsoleActions());

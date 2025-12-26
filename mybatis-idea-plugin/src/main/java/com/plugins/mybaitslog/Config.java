@@ -1,7 +1,7 @@
 package com.plugins.mybaitslog;
 
 import com.intellij.ide.util.PropertiesComponent;
-import com.intellij.openapi.project.Project;
+import com.intellij.openapi.application.ApplicationManager;
 
 import java.awt.*;
 import java.util.*;
@@ -20,6 +20,14 @@ public class Config {
 
     public final static String KEY_NAME = "==>  SQLStructure: ";
     public final static String KEY_ERROR_NAME = "==>  SQLStructureError: ";
+
+    // 原始日志解析常量
+    public final static String PREPARING = "Preparing:";
+    public final static String PARAMETERS = "Parameters:";
+    public final static String PARAM_SEPARATOR = ", ";
+    public final static String TYPE_START = "(";
+    public final static String TYPE_END = ")";
+    public final static String PLACEHOLDER = "?";
 
     public static final String SQL_START_LINE = "- -->  ";
     public static final String SQL_MIDDLE_LINE = "    >  ";

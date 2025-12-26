@@ -4,7 +4,7 @@
     <vendor email="chinacclk@gmail.com" url="https://github.com/Link-Kou/intellij-mybaitslog">linkkou</vendor>
 
     <!-- 插件版本 -->
-    <version>5.0.8.2</version>
+    <version>5.0.9</version>
     <!-- please see https://confluence.jetbrains.com/display/IDEADEV/Build+Number+Ranges for description -->
     <idea-version since-build="201"/>
     <!-- 插件的描述 -->
@@ -26,6 +26,17 @@
 
     <!-- 插件的功能 -->
     <change-notes><![CDATA[
+    <ul>
+        <p>5.0.9</p>
+        <li>新增：支持国际化（中/英），默认中文</li>
+        <li>新增：支持从选中文本还原 SQL（右键菜单），并直接输出到控制台</li>
+        <li>优化：重构过滤设置窗口 UI，更加美观</li>
+        <li>优化：支持后台日志缓存，无需预先打开窗口</li>
+        <li>New: Support Internationalization (Chinese/English), default Chinese</li>
+        <li>New: Support restoring SQL from selected text (Context Menu) and output to console</li>
+        <li>Optimize: Refactor Filter Setting Window UI</li>
+        <li>Optimize: Support background log caching</li>
+    </ul>
     <ul>
         <p>5.0.8</p>
         <li>修正部分也知问题;优化界面感官</li>
@@ -86,6 +97,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <!-- Add your extensions here -->
+        <notificationGroup id="MyBatisLog.Notification" displayType="BALLOON" key="notification.group.name"/>
         <java.programPatcher implementation="com.plugins.mybaitslog.PerRun"/>
         <!--定义控制台右键动作-->
         <!--<consoleActionsPostProcessor implementation=""/>-->
@@ -102,6 +114,13 @@
     </extensions>
 
     <actions>
-        <!-- restore sql from selection -->
+        <group id="com.plugins.mybaitslog.action.RestoreSqlGroup" popup="false" icon="/icons/mybatis.png">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <add-to-group group-id="ConsoleEditorPopupMenu" anchor="last"/>
+            <action id="com.plugins.mybaitslog.action.RestoreSqlAction"
+                    class="com.plugins.mybaitslog.action.RestoreSqlAction"
+                    icon="/icons/mybatis.png"/>
+        </group>
     </actions>
+    <resource-bundle>messages.MyBatisLogBundle</resource-bundle>
 </idea-plugin>

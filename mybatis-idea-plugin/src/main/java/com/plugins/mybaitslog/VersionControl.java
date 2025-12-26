@@ -19,6 +19,6 @@ public class VersionControl {
     private static final int BaselineVersion = ApplicationInfo.getInstance().getBuild().getBaselineVersion();
 
     public static ContentFactory getContentFactory() {
-        return  ContentFactory.SERVICE.getInstance();
+        return  ContentFactory.getInstance();
     }
 }

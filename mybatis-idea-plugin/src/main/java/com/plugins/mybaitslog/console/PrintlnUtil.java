@@ -7,11 +7,16 @@ import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.project.Project;
 import com.plugins.mybaitslog.Config;
+import com.plugins.mybaitslog.PluginUtil;
 import org.apache.commons.lang.StringUtils;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * 打印简单工具类
@@ -26,6 +31,10 @@ public class PrintlnUtil {
      * 多项目控制台独立性
      */
     public static Map<Project, ConsoleView> consoleViewMap = new ConcurrentHashMap<>(16);
+    /**
+     * 缓存未初始化的日志
+     */
+    private static final Map<Project, Queue<Runnable>> logCache = new ConcurrentHashMap<>();
 
 
     private static final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss")
@@ -34,7 +43,10 @@ public class PrintlnUtil {
             //当字段值为空或null时，依然对该字段进行转换
             .serializeNulls()
             //防止特殊字符出现乱码
-            .disableHtmlEscaping().create();
+            .disableHtmlEscaping()
+            // 宽松模式
+            .setLenient()
+            .create();
 
     /**
      * Sql语句还原，整个插件的核心就是该方法
@@ -51,6 +63,87 @@ public class PrintlnUtil {
         return null;
     }
 
+    /**
+     * 从原始文本中还原 SQL
+     * @param text 包含 Preparing: 和 Parameters: 的文本
+     * @return 还原后的 SQL，如果解析失败返回 null
+     */
+    public static String restoreSqlFromText(String text) {
+        // 尝试解析插件自己的 JSON 格式
+        try {
+            if (text.contains(Config.Idea.getParameters())) {
+                SqlVO sqlVO = restoreSql(text);
+                if (sqlVO != null) {
+                    return sqlVO.getCompleteSql();
+                }
+            }
+        } catch (Exception e) {
+            // 忽略异常，主要测试标准文本还原 通知异常
+            if (Config.Idea.getRunNotification()) {
+                PluginUtil.Notificat_Error(e.getMessage());
+            }
+        }
+
+
+        String preparingLine = null;
+        String parametersLine = null;
+
+        String[] lines = text.split("\\r?\\n");
+        for (String line : lines) {
+            if (line.contains(Config.PREPARING)) {
+                preparingLine = line.substring(line.indexOf(Config.PREPARING) + Config.PREPARING.length()).trim();
+            }
+            if (line.contains(Config.PARAMETERS)) {
+                parametersLine = line.substring(line.indexOf(Config.PARAMETERS) + Config.PARAMETERS.length()).trim();
+            }
+        }
+
+        if (preparingLine == null) {
+            return null;
+        }
+
+        if (parametersLine == null || parametersLine.isEmpty()) {
+            return preparingLine;
+        }
+
+        // 提取参数
+        List<String> params = new ArrayList<>();
+        String[] rawParams = parametersLine.split(Config.PARAM_SEPARATOR);
+        for (String rawParam : rawParams) {
+            int typeIndex = rawParam.lastIndexOf(Config.TYPE_START);
+            if (typeIndex > 0 && rawParam.endsWith(Config.TYPE_END)) {
+                String value = rawParam.substring(0, typeIndex);
+                String type = rawParam.substring(typeIndex + 1, rawParam.length() - 1);
+
+                // 根据类型处理引号
+                if (type.equals("String") || type.equals("Timestamp") || type.equals("Date") || type.equals("Time")) {
+                    params.add("'" + value + "'");
+                } else {
+                    params.add(value);
+                }
+            } else {
+                params.add(rawParam);
+            }
+        }
+
+        // 替换占位符 ?
+        StringBuilder sql = new StringBuilder();
+        int paramIndex = 0;
+        for (int i = 0; i < preparingLine.length(); i++) {
+            char c = preparingLine.charAt(i);
+            if (String.valueOf(c).equals(Config.PLACEHOLDER)) {
+                if (paramIndex < params.size()) {
+                    sql.append(params.get(paramIndex++));
+                } else {
+                    sql.append(Config.PLACEHOLDER);
+                }
+            } else {
+                sql.append(c);
+            }
+        }
+
+        return sql.toString();
+    }
 
     public static void printsInit(ConsoleView consoleView) {
         if (Config.Idea.getWelcomeMessage()) {
@@ -98,11 +191,30 @@ public class PrintlnUtil {
         ConsoleView consoleView = consoleViewMap.get(project);
         if (consoleView != null) {
             consoleView.print(rowLine, consoleViewContentType);
+        } else {
+            // 缓存日志
+            logCache.computeIfAbsent(project, k -> new ConcurrentLinkedQueue<>())
+                    .add(() -> {
+                        ConsoleView cv = consoleViewMap.get(project);
+                        if (cv != null) {
+                            cv.print(rowLine, consoleViewContentType);
+                        }
+                    });
         }
     }
 
     public static void setConsoleView(Project project, ConsoleView consoleView) {
         consoleViewMap.put(project, consoleView);
+        // 回放缓存的日志
+        Queue<Runnable> cache = logCache.remove(project);
+        if (cache != null) {
+            while (!cache.isEmpty()) {
+                Runnable task = cache.poll();
+                if (task != null) {
+                    task.run();
+                }
+            }
+        }
     }
 
     public static ConsoleView getConsoleView(Project project) {

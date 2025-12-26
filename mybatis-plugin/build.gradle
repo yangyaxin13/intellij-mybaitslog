@@ -33,8 +33,8 @@ group 'com.plugins.mybatislog.plugin'
 version '1.0.10'
 
 java {
-    sourceCompatibility = "8"
-    targetCompatibility = "8"
+    sourceCompatibility = "17"
+    targetCompatibility = "17"
 }
 
 

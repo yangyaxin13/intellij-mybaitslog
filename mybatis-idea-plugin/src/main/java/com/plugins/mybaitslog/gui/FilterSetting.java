@@ -1,141 +1,141 @@
 package com.plugins.mybaitslog.gui;
 
+import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.ui.ColorChooser;
+import com.intellij.ui.components.JBCheckBox;
+import com.intellij.ui.components.JBScrollPane;
+import com.intellij.ui.components.JBTextArea;
+import com.intellij.ui.components.JBTextField;
+import com.intellij.ui.table.JBTable;
+import com.intellij.util.ui.FormBuilder;
 import com.plugins.mybaitslog.Config;
 import com.plugins.mybaitslog.gui.compone.MyColorButton;
 import com.plugins.mybaitslog.gui.compone.MyTableModel;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import javax.swing.table.TableModel;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.Map;
+import java.util.ResourceBundle;
 
 /**
  * 过滤设置 窗口
- *
- * @author lk
- * @version 1.0
- * @date 2020/8/23 17:14
+ * 重构为使用 DialogWrapper 和 FormBuilder
  */
-public class FilterSetting extends JDialog {
-    private JPanel contentPane;
-    private JButton buttonOK;
-    private JButton buttonCancel;
-    private JTextField preparingTextField;
-    private JCheckBox startupCheckBox;
-    private JPanel jpanel_select;
-    private JPanel jpanel_update;
-    private JPanel jpanel_delect;
-    private JPanel jpanel_insert;
-    private JPanel jpanel_other;
-    private JTextArea addOpensTextArea;
-    private JTable excludeTable;
-    private JCheckBox checkBox_sql;
-    private JCheckBox checkBox_notification;
-    private JCheckBox checkBox_fold;
-    private JCheckBox checkBox_welcome;
-    private JCheckBox checkBox_rmi;
+public class FilterSetting extends DialogWrapper {
 
+    private final ResourceBundle bundle;
 
-    /**
-     * 窗口初始化
-     */
+    private JBTextField preparingTextField;
+    private JBCheckBox startupCheckBox;
+    private JBCheckBox checkBox_sql;
+    private JBCheckBox checkBox_notification;
+    private JBCheckBox checkBox_fold;
+    private JBCheckBox checkBox_welcome;
+    private JBCheckBox checkBox_rmi;
+
+    private MyColorButton btnSelect;
+    private MyColorButton btnUpdate;
+    private MyColorButton btnDelete;
+    private MyColorButton btnInsert;
+    private MyColorButton btnOther;
+
+    private JBTextArea addOpensTextArea;
+    private JBTable excludeTable;
+    private MyTableModel myTableModel;
+
     public FilterSetting() {
-        //设置标题
-        this.setTitle("Filter Setting");
-        this.setBackground(Color.WHITE);
-        this.preparingTextField.setText(Config.Idea.getParameters());
-        //PropertiesComponent.getInstance(project).getInt(Config.Idea.DB_STARTUP_KEY, 1);
-        boolean startup = Config.Idea.getStartup();
-        boolean formatSql = Config.Idea.getFormatSql();
-        boolean notification = Config.Idea.getRunNotification();
-        boolean welcomeMessage = Config.Idea.getWelcomeMessage();
-        boolean whetherfold = Config.Idea.getWhetherfold();
-        boolean runrmi = Config.Idea.getRunRmi();
+        super(true); // use current window as parent
+        // 加载资源包，默认中文
+        bundle = ResourceBundle.getBundle("messages.MyBatisLogBundle", java.util.Locale.CHINA);
 
-        startupCheckBox.setSelected(startup);
-        checkBox_sql.setSelected(formatSql);
-        checkBox_notification.setSelected(notification);
-        checkBox_fold.setSelected(whetherfold);
-        checkBox_welcome.setSelected(welcomeMessage);
-        checkBox_rmi.setSelected(runrmi);
+        init();
+        setTitle(bundle.getString("title"));
+    }
 
-        setContentPane(contentPane);
-        setModal(true);
-        getRootPane().setDefaultButton(buttonOK);
+    @Override
+    protected @Nullable JComponent createCenterPanel() {
+        // 初始化组件
+        preparingTextField = new JBTextField(Config.Idea.getParameters());
+        startupCheckBox = new JBCheckBox(bundle.getString("startup"), Config.Idea.getStartup());
+        checkBox_sql = new JBCheckBox(bundle.getString("formatSql"), Config.Idea.getFormatSql());
+        checkBox_notification = new JBCheckBox(bundle.getString("notification"), Config.Idea.getRunNotification());
+        checkBox_fold = new JBCheckBox(bundle.getString("fold"), Config.Idea.getWhetherfold());
+        checkBox_welcome = new JBCheckBox(bundle.getString("welcomeMessage"), Config.Idea.getWelcomeMessage());
+        checkBox_rmi = new JBCheckBox(bundle.getString("rmi"), Config.Idea.getRunRmi());
 
-        //region 自定义控件
-        final MyTableModel myTableModel = new MyTableModel();
-        final Map<String, Boolean> perRunMap = Config.Idea.getPerRunMap();
+        // 颜色按钮
+        btnSelect = createColorButton("select");
+        btnUpdate = createColorButton("update");
+        btnDelete = createColorButton("delete");
+        btnInsert = createColorButton("insert");
+        btnOther = createColorButton("other");
+
+        // 表格
+        myTableModel = new MyTableModel();
+        Map<String, Boolean> perRunMap = Config.Idea.getPerRunMap();
         for (Map.Entry<String, Boolean> next : perRunMap.entrySet()) {
             myTableModel.addRow(new Object[]{next.getKey(), next.getValue()});
         }
-        this.excludeTable.setModel(myTableModel);
+        excludeTable = new JBTable(myTableModel);
+        JBScrollPane tableScroll = new JBScrollPane(excludeTable);
+        tableScroll.setPreferredSize(new Dimension(400, 100));
 
-        addOpensTextArea.setText(String.join("\n", Config.Idea.getAddOpens()));
-        String[] colorname = {"select", "update", "delete", "insert", "other"};
-        for (String s : colorname) {
-            final MyColorButton myColorButton = new MyColorButton(Config.Idea.getColor(s));
-            myColorButton.addActionListener(e -> onColor(s, myColorButton));
-            switch (s) {
-                case "select":
-                    this.jpanel_select.add(myColorButton);
-                    break;
-                case "update":
-                    this.jpanel_update.add(myColorButton);
-                    break;
-                case "delete":
-                    this.jpanel_delect.add(myColorButton);
-                    break;
-                case "insert":
-                    this.jpanel_insert.add(myColorButton);
-                    break;
-                case "other":
-                    this.jpanel_other.add(myColorButton);
-                    break;
-                default:
-                    break;
-            }
-        }
-        //endregion
+        // Add Opens
+        addOpensTextArea = new JBTextArea(String.join("\n", Config.Idea.getAddOpens()));
+        JBScrollPane addOpensScroll = new JBScrollPane(addOpensTextArea);
+        addOpensScroll.setPreferredSize(new Dimension(400, 60));
 
-        buttonOK.addActionListener(e -> onOK());
-        buttonCancel.addActionListener(e -> onCancel());
-        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                onCancel();
+        // 构建布局
+        JPanel colorPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        colorPanel.add(new JLabel(bundle.getString("select"))); colorPanel.add(btnSelect);
+        colorPanel.add(new JLabel(bundle.getString("update"))); colorPanel.add(btnUpdate);
+        colorPanel.add(new JLabel(bundle.getString("delete"))); colorPanel.add(btnDelete);
+        colorPanel.add(new JLabel(bundle.getString("insert"))); colorPanel.add(btnInsert);
+        colorPanel.add(new JLabel(bundle.getString("other"))); colorPanel.add(btnOther);
+
+        JPanel checkBoxPanel = new JPanel(new GridLayout(2, 3));
+        checkBoxPanel.add(startupCheckBox);
+        checkBoxPanel.add(checkBox_sql);
+        checkBoxPanel.add(checkBox_notification);
+        checkBoxPanel.add(checkBox_fold);
+        checkBoxPanel.add(checkBox_welcome);
+        checkBoxPanel.add(checkBox_rmi);
+
+        return FormBuilder.createFormBuilder()
+                .addLabeledComponent(bundle.getString("preparing"), preparingTextField)
+                .addComponent(checkBoxPanel)
+                .addComponent(colorPanel)
+                .addLabeledComponent(bundle.getString("exclude"), tableScroll)
+                .addLabeledComponent(bundle.getString("addOpens"), addOpensScroll)
+                .getPanel();
+    }
+
+    private MyColorButton createColorButton(String type) {
+        MyColorButton btn = new MyColorButton(Config.Idea.getColor(type));
+        btn.addActionListener(e -> {
+            Color newColor = ColorChooser.chooseColor(this.getRootPane(), "Choose Color", Color.white, true);
+            if (newColor != null) {
+                btn.setColor(newColor);
+                Config.Idea.setColor(type, newColor);
             }
         });
-        contentPane.registerKeyboardAction(e -> onCancel(), KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        return btn;
     }
 
+    @Override
+    protected void doOKAction() {
+        // 保存设置
+        String preparing = preparingTextField.getText();
+        String addOpens = addOpensTextArea.getText();
 
-    private void onColor(String type, MyColorButton myColorButton) {
-        Color newColor = ColorChooser.chooseColor(this, "Choose Color", Color.white, true);
-        if (null != newColor) {
-            myColorButton.setColor(newColor);
-            Config.Idea.setColor(type, newColor);
-        }
-    }
-
-    /**
-     * 点击确认按钮处理
-     */
-    private void onOK() {
-        String preparing = this.preparingTextField.getText();
-        String addOpens = this.addOpensTextArea.getText();
-        final TableModel model = this.excludeTable.getModel();
-        final int rowCount = model.getRowCount();
+        final int rowCount = myTableModel.getRowCount();
         for (int r = 0; r < rowCount; r++) {
-            final Object key = model.getValueAt(r, 0);
-            final Object value = model.getValueAt(r, 1);
+            final Object key = myTableModel.getValueAt(r, 0);
+            final Object value = myTableModel.getValueAt(r, 1);
             Config.Idea.setPerRunMap((String) key, (Boolean) value, true);
         }
+
         Config.Idea.setAddOpens(addOpens);
         Config.Idea.setParameters(preparing, Config.Idea.PARAMETERS);
         Config.Idea.setStartup(startupCheckBox.isSelected() ? 1 : 0);
@@ -144,11 +144,7 @@ public class FilterSetting extends JDialog {
         Config.Idea.setWelcomeMessage(checkBox_welcome.isSelected() ? 1 : 0);
         Config.Idea.setWhetherfold(checkBox_fold.isSelected() ? 1 : 0);
         Config.Idea.setRunRmi(checkBox_rmi.isSelected() ? 1 : 0);
-        onCancel();
-    }
 
-    private void onCancel() {
-        this.setModal(false);
-        this.setVisible(false);
+        super.doOKAction();
     }
 }
