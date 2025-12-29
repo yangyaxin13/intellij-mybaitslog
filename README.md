@@ -1,51 +1,42 @@
-# [![Mybatislog](https://raw.githubusercontent.com/Link-Kou/intellij-mybaitslog/master/image/pluginIcon.svg)](https://github.com/Link-Kou/intellij-mybaitslog) Mybatislog
+# [![Mybatislog](https://raw.githubusercontent.com/yangyaxin13/intellij-mybaitslog/master/image/pluginIcon.svg)](https://github.com/yangyaxin13/intellij-mybaitslog) Mybatislog
 
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/Link-Kou/intellij-mybaitslog)
-![GitHub](https://img.shields.io/github/license/Link-Kou/intellij-mybaitslog)
-![GitHub issues](https://img.shields.io/github/issues/Link-Kou/intellij-mybaitslog)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/yangyaxin13/intellij-mybaitslog)
+![GitHub](https://img.shields.io/github/license/yangyaxin13/intellij-mybaitslog)
+![GitHub issues](https://img.shields.io/github/issues/yangyaxin13/intellij-mybaitslog)
 
 ### Mybatislog能做什么？
 
 > Mybatislog是基于IntelliJ 开发的插件项目，用来格式化输出Mybatis的Sql。
 
-![样列](https://raw.githubusercontent.com/Link-Kou/intellij-mybaitslog/master/image/2020-03-25_09-28-47.jpg "样列")
+![样列](https://raw.githubusercontent.com/yangyaxin13/intellij-mybaitslog/master/image/iShot_2025-12-29_10.46.48.png)
 
-![样列](https://raw.githubusercontent.com/Link-Kou/intellij-mybaitslog/master/image/2023-04-28_08-33-52.gif "样列")
+![样列](https://raw.githubusercontent.com/yangyaxin13/intellij-mybaitslog/master/image/2020-03-25_09-28-47.jpg "样列")
 
+![样列](https://raw.githubusercontent.com/yangyaxin13/intellij-mybaitslog/master/image/2023-04-28_08-33-52.gif "样列")
 
 ### 在线安装(搜索)
 
-IDEA --> Setting --> Plugins --> 搜索 MyBatis Log EasyPlus
-
-![样列](https://raw.githubusercontent.com/Link-Kou/intellij-mybaitslog/master/image/img.png "样列")
-
+**暂不提供在线安装**
 
 ### 捐赠 | Donate
 
 > 虽然日常时间很忙碌，也为了碎银几两而发愁，但是希望借此慰藉心中早已经开始缥缈的诗与远方。<br/>
 > 欢迎Fork，欢迎继续扩展
 
-
 ## <p style="color:red">★★超级无敌丝滑★★</p>
+
 > 版本V5.<b style="color:red">支持所有数据库的所有SQL都能均能正常格式化输出</b><br/>
-> 版本V5.插件支持IDEA版本2020.1以上<br/>
-> 版本V5.JKD8以上<br/>
+> 版本V5.插件支持IDEA版本2023.1以上<br/>
+> 版本V5.JKD17<br/>
 > 版本V5.插件支持Mybatis版本<b>3.2.0<b/>以上，3.2.0已经是2013发布的。所以更低版本将不在支持<br/>
 > 版本V5.插件对MybatisPlus等插件也进行了测试，目前大多数功能已支持<br/>
 
 ## <p style="color:red">★★已知问题★★</p>
+
 > 不支持Gradle，正在想办法中。如有路过大神知道如何解决还请度化本项目一下。
 > 不支持自定义实现SqlSource，有解决办法测试不理想，在继续想办法中。
 
-### Sponsors
-
-<table>
-      <td>
-        <a href="https://www.jetbrains.com/?from=TreeInfotip" target="_blank">
-            <img src="https://cdn.jsdelivr.net/gh/YiiGuxing/TranslationPlugin@master/images/jetbrains.svg" alt="JetBrains" title="Development powered by JetBrains.">
-        </a>
-      </td>
-</table>
+#### <kbd>2025.12.26</kbd> -> <kbd>《IDEA 2023.1 以上》(JAVA_17版本),无需提前打开窗口,支持区域选中还原SQL</kbd>
 
 #### <kbd>2023.08.20</kbd> -> <kbd> 最后一个支持《IDEA 2021.1》的版本，感谢各位社区伙伴的测试反馈,现已修复若干个已知问题，装备下一个版本大迭代</kbd>
 
